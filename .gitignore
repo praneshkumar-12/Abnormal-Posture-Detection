@@ -1,0 +1,5 @@
+vivenv/
+__pycache__/
+*.zip
+old_models/
+training/

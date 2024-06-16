@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sitting Posture Detection</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .correct-posture {
+            color: green;
+        }
+
+        .incorrect-posture {
+            color: red;
+        }
+
+        .disabled{
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <h1 class="text-center">Sitting Posture Detection</h1>
+    <div class="text-center mt-3">
+        <button id="detectButton" class="btn btn-primary" onclick="startDetection()">Detect Posture</button>
+        <button id="stopDetectButton" class="btn btn-danger" onclick="stopDetection()" disabled>Stop Detection</button>
+    </div>
+    <div class="text-center mt-3">
+        <h3 id="postureStatus" class="correct-posture">Correct Posture - Confidence: 0%</h3>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- JavaScript -->
+<script>
+    let pid;
+
+    // Function to update posture status
+    function updatePostureStatus(prediction, confidence) {
+        const postureStatus = document.getElementById('postureStatus');
+        let isCorrect = false;
+        if (prediction === "Correct Posture"){
+            isCorrect = true;
+        }
+        else{
+            isCorrect = false;
+        }
+
+        if (isCorrect) {
+            postureStatus.textContent = `Correct Posture - Confidence: ${confidence}%`;
+            postureStatus.classList.remove('incorrect-posture');
+            postureStatus.classList.add('correct-posture');
+            document.body.style.backgroundColor = '#d4edda'; // Light shade of green
+        } else {
+            postureStatus.textContent = `Incorrect Posture - Confidence: ${confidence}%`;
+            postureStatus.classList.remove('correct-posture');
+            postureStatus.classList.add('incorrect-posture');
+            document.body.style.backgroundColor = '#f8d7da'; // Light shade of red
+            // const beep = new Audio('/static/beep.mp3'); 
+            // beep.play();
+        }
+    }
+
+
+    function startDetection() {
+        $.get('/start', function(data) {});
+
+        document.getElementById('detectButton').disabled = true;
+        document.getElementById('stopDetectButton').disabled = false;
+
+        function updatePosture() {
+            $.get('/get_posture', function(data) {
+                console.log(data);
+                updatePostureStatus(data.posture, data.confidence);
+            });
+
+        }
+
+        pid = setInterval(updatePosture, 100);
+
+    }
+
+    function stopDetection() {
+        $.get('/stop', function(data) {});
+        clearInterval(pid);
+
+        document.getElementById('detectButton').disabled = false;
+        document.getElementById('stopDetectButton').disabled = true;
+    }
+
+</script>
+
+</body>
+</html>
